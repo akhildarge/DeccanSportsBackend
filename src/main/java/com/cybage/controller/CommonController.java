@@ -2,6 +2,7 @@ package com.cybage.controller;
 
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,6 +30,9 @@ public class CommonController {
 	@Autowired
 	private BatchesRepository batchesRepository;
 
+	private static final Logger LOGGER = Logger.getLogger(CommonController.class.getName());
+	
+	
 	// get price by sports ID
 	@GetMapping("/getpricebysport/{id}")
 	public Pricing getPriceBySportsId(@PathVariable Integer id) {

@@ -15,6 +15,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import org.apache.log4j.Logger;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
@@ -48,7 +49,7 @@ import com.cybage.model.User;
 import com.cybage.model.UserRole;
 import com.cybage.service.IAdminService;
 import com.cybage.service.IUserService;
-//integrating jenkins
+
 /**
  * @author: Akhil Darge
  * @date: 16-Nov-2021 8:41:57 pm
@@ -80,6 +81,8 @@ public class AdminController {
 	private String gitUrl;
 	@Value("${uploadDir}")
 	private String uploadFolder;
+	
+	private static final Logger LOGGER = Logger.getLogger(AdminController.class.getName());
 
 	@GetMapping("/managerDetails")
 	public ResponseEntity<List<User>> getManagerDetails() {

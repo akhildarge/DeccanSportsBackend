@@ -43,6 +43,8 @@ public class SportsController {
 
 	@Autowired
 	private IBatchService batchService;
+	
+	//private static final Logger LOGGER = Logger.getLogger(SportsController.class.getName());
 
 	@GetMapping("/getAllSports")
 	public ResponseEntity<List<Sports>> getAllSports() {

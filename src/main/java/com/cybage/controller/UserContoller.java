@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.mail.internet.MimeMessage;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -69,6 +70,9 @@ public class UserContoller {
 	
 	@Value("${spring.mail.username}")
 	private String host;
+	
+	
+	private static final Logger LOGGER = Logger.getLogger(UserContoller.class.getName());
 
 	@PostMapping("/register")
 	public ResponseEntity<User> registerUser(@RequestBody User user) {
@@ -88,6 +92,7 @@ public class UserContoller {
 
 		try {
 
+			LOGGER.debug("password"+ request.getPassword());
 			// authenticating the user
 			UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
 					request.getEmail(), Base64.getEncoder().encodeToString(request.getPassword().getBytes()));
@@ -113,7 +118,7 @@ public class UserContoller {
 		int loginAttempt = user.getLoginAttempt();
 		if (loginAttempt > 3) {
 
-			return new ResponseEntity<>("Account has been locked", HttpStatus.UNAUTHORIZED);
+			return new ResponseEntity<>("Account has been locked", HttpStatus.LOCKED);
 
 		} else if (loginAttempt != 0) {
 			user.setLoginAttempt(0);
