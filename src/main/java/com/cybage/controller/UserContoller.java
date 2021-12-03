@@ -92,7 +92,8 @@ public class UserContoller {
 
 		try {
 
-			LOGGER.debug("password"+ request.getPassword());
+		//	LOGGER.debug("password"+ Base64.getEncoder().encodeToString(request.getPassword().getBytes()));
+			System.out.println( Base64.getEncoder().encodeToString(request.getPassword().getBytes()));
 			// authenticating the user
 			UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
 					request.getEmail(), Base64.getEncoder().encodeToString(request.getPassword().getBytes()));

@@ -106,7 +106,7 @@ public class AdminController {
 
 	@GetMapping("/userDetails")
 	public ResponseEntity<List<User>> getAllUsers() {
-		List<User> userList = adminService.getAllLockedUsers();
+		List<User> userList = userService.getAllUsers();
 		if (!userList.isEmpty()) {
 			return new ResponseEntity<>(userList, HttpStatus.OK);
 		} else {
