@@ -15,6 +15,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
+import org.eclipse.jgit.annotations.Nullable;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.lang.NonNull;
 
@@ -39,6 +40,7 @@ public class Sports {
 	private String sportsName;
 	
 	@Enumerated(EnumType.STRING)
+	@Nullable
 	private SportsCategory sportsCategory;
 	
 	@Column

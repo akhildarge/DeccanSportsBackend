@@ -146,7 +146,7 @@ public class AdminServiceImpl implements IAdminService {
 			if (sports != null) {
 				System.out.println("Removing manager from sports");
 				sports.setManagerId(null);
-				sportsRepository.save(sports);
+		 		sportsRepository.save(sports);
 			}
 		}
 		return userRepository.save(user);

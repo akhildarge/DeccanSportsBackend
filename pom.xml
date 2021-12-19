@@ -110,9 +110,9 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
+			<!-- 	<configuration>
 					<outputDirectory>/Users/akhil/Documents/CYBAGE/Project/JAVA_MajorProject_G5/backend</outputDirectory>
-				</configuration>
+				</configuration> -->
 			</plugin>
 		</plugins>
 		<finalName>Deccan-Sports-Club</finalName>

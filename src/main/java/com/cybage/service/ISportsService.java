@@ -33,4 +33,6 @@ public interface ISportsService {
 	public EnrolledSports enrollUser(EnrolledSports enrolledSports);
 	
 	public EnrolledSports addPayment(int enrollmentId);
+	
+	public Sports getSportsBySportsName(String sportsName);
 }

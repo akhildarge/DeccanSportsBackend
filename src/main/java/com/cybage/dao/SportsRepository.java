@@ -20,5 +20,7 @@ public interface SportsRepository extends JpaRepository<Sports, Integer> {
 	List<Sports> findAllBySportsCategory(SportsCategory sportCategory);
 	
 	Sports findSportsByManagerId(User user);
+	
+	Sports findSportsBySportsName(String sportsName);
 
 }

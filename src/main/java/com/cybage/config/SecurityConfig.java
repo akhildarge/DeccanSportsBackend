@@ -70,7 +70,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.antMatchers("/batches/**").permitAll().antMatchers("/user/getotp/**", "/user/getUserToken/**")
 				.permitAll().antMatchers("/user/getUserByEmail/**").permitAll().antMatchers("/user/addUser").permitAll()
 				.antMatchers("/user/activateAccount/**").permitAll().antMatchers("/user/getUserByUserName/**")
-				.permitAll().antMatchers("/user/forgotpsw/**", "/user/getotp/**", "/user/forgetOtp/**").permitAll()
+				.permitAll().antMatchers("/user/forgotpsw/**", "/user/getotp/**", "/user/forgetOtp/**","/user/notifyUser/**").permitAll()
 				.antMatchers("/admin/uploadProfileImg/**").permitAll().anyRequest().authenticated().and()
 				.exceptionHandling().and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 

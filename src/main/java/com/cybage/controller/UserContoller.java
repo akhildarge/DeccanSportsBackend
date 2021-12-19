@@ -67,11 +67,13 @@ public class UserContoller {
 
 	@Autowired
 	private JavaMailSender emailSender;
-	
+
 	@Value("${spring.mail.username}")
 	private String host;
 	
-	
+	@Value("${feedbackUrl}")
+	private String feedbackUrl;
+
 	private static final Logger LOGGER = Logger.getLogger(UserContoller.class.getName());
 
 	@PostMapping("/register")
@@ -92,9 +94,8 @@ public class UserContoller {
 
 		try {
 
-		//	LOGGER.debug("password"+ Base64.getEncoder().encodeToString(request.getPassword().getBytes()));
-			System.out.println( Base64.getEncoder().encodeToString(request.getPassword().getBytes()));
-			// authenticating the user
+			// creating user authentication token which will be passed to authentication
+			// manager authenticate method
 			UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
 					request.getEmail(), Base64.getEncoder().encodeToString(request.getPassword().getBytes()));
 
@@ -118,7 +119,6 @@ public class UserContoller {
 
 		int loginAttempt = user.getLoginAttempt();
 		if (loginAttempt > 3) {
-
 			return new ResponseEntity<>("Account has been locked", HttpStatus.LOCKED);
 
 		} else if (loginAttempt != 0) {
@@ -132,6 +132,26 @@ public class UserContoller {
 				HttpStatus.OK);
 
 	}
+	
+	//notify user that account has been locked
+	@GetMapping("/notifyUser/{email}")
+	public ResponseEntity<String> notifyUser(@PathVariable String email){
+		/**
+		 * We need to make process fast or else remove this
+		 */
+		User user = userService.findByEmail(email);
+		SimpleMailMessage mesg = new SimpleMailMessage();
+		mesg.setFrom(host);
+		mesg.setTo(user.getEmail());
+		mesg.setSubject("Deccan Sports Club");
+		mesg.setText("Hello " + user.getName()
+				+ ",\n\nYour account has been locked due to more than 3  login attempts.\nPlease contact our Sports Club to unlock your account. "
+				+ "\n\n\nThanks and Regards,\nAdmin,\nDeccan Sports Club");
+		emailSender.send(mesg);
+		/******/
+		return new ResponseEntity<>("Notification sent",HttpStatus.OK);
+	}
+	
 
 	// get token and user object
 	@GetMapping("/getUserToken/{email}")
@@ -155,12 +175,12 @@ public class UserContoller {
 	public String OTPEmail(String email) {
 		System.out.println("Sending Email.....");
 		String otp = "" + ((int) (Math.random() * 9000) * 100);
-		System.out.println("OTP: "+otp);
+		System.out.println("OTP: " + otp);
 		SimpleMailMessage mesg = new SimpleMailMessage();
 		mesg.setFrom(host);
 		mesg.setTo(email);
 		mesg.setSubject("Welcome to Deccan Sports Club");
-		mesg.setText("Hello,\nYour OTP for Login is  " + otp+"\n\n\nThanks and Regards,\nAdmin\nDeccan Sports Club");
+		mesg.setText("Hello,\nYour OTP for Login is  " + otp + "\n\n\nThanks and Regards,\nAdmin\nDeccan Sports Club");
 		emailSender.send(mesg);
 
 		System.out.println("success");
@@ -274,7 +294,7 @@ public class UserContoller {
 			try {
 				MimeMessage mimeMessage = emailSender.createMimeMessage();
 				MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
-				String htmlMsg = "Please click on ACTIVATE to activate your account.\n<a href='https://localhost:4200/temp-message/"
+				String htmlMsg = "Please click on ACTIVATE to activate your account.\n<a href='http://172.27.186.213:4200/temp-message/"
 						+ user.getUserId() + "'> ACTIVATE</a>\n\nThanks and Regards,\nAdmin\nDeccan Sports Club";
 				helper.setFrom(host);
 				// mimeMessage.setContent(htmlMsg, "text/html"); /** Use this or below line **/
@@ -447,8 +467,8 @@ public class UserContoller {
 
 	@PostMapping("/addFeedback")
 	public ResponseEntity<String> addFeedback(@RequestBody Object feedback) {
-		String uri = "http://localhost:7070/feedback/addFeedback";
-		RestTemplate restTemplate = new RestTemplate();
+		String uri = "http://"+feedbackUrl+":7070/feedback/addFeedback"; 
+		RestTemplate restTemplate = new RestTemplate();	
 		Boolean result = restTemplate.postForObject(uri, feedback, Boolean.class);
 		return new ResponseEntity<>("Feedback added successfully", HttpStatus.OK);
 	}

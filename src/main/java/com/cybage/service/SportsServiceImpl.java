@@ -102,4 +102,10 @@ public class SportsServiceImpl implements ISportsService {
 		enrolledSports.setPaymentStatus(1);
 		return enrolledSportsRepo.save(enrolledSports);
 	}
+
+	@Override
+	public Sports getSportsBySportsName(String sportsName) {
+	
+		return sportsRepository.findSportsBySportsName(sportsName);
+	}
 }

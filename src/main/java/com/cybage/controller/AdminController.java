@@ -48,7 +48,9 @@ import com.cybage.model.SportsCategory;
 import com.cybage.model.User;
 import com.cybage.model.UserRole;
 import com.cybage.service.IAdminService;
+import com.cybage.service.ISportsService;
 import com.cybage.service.IUserService;
+import com.cybage.service.SportsServiceImpl;
 
 /**
  * @author: Akhil Darge
@@ -68,8 +70,11 @@ public class AdminController {
 	private IUserService userService;
 
 	@Autowired
+	private ISportsService sportsService;
+
+	@Autowired
 	private JavaMailSender emailSender;
-	
+
 	@Value("${spring.mail.username}")
 	private String host;
 
@@ -81,7 +86,9 @@ public class AdminController {
 	private String gitUrl;
 	@Value("${uploadDir}")
 	private String uploadFolder;
-	
+	@Value("${feedbackUrl}")
+	private String feedbackUrl;
+
 	private static final Logger LOGGER = Logger.getLogger(AdminController.class.getName());
 
 	@GetMapping("/managerDetails")
@@ -110,7 +117,7 @@ public class AdminController {
 		if (!userList.isEmpty()) {
 			return new ResponseEntity<>(userList, HttpStatus.OK);
 		} else {
-			return new ResponseEntity<>(new ArrayList<User>(),HttpStatus.OK);
+			return new ResponseEntity<>(new ArrayList<User>(), HttpStatus.OK);
 		}
 	}
 
@@ -122,7 +129,7 @@ public class AdminController {
 		mesg.setSubject("Welcome to Deccan Sports Club");
 		mesg.setText("Hello " + user.getName()
 				+ ",\n\nYour login credentials are given below: \n\nlogin Id is your email\nusername: "
-				+ user.getUserName() + "\npassword: " + user.getPassword()
+				+ user.getUserName() +"\nemail: "+user.getEmail() +"\npassword: " + user.getPassword()
 				+ "\n\nPlease try to login with your email and password.\nYou can check your personal details by going through your profile page in dashboard.\n\nIf there are any incorrect details, please let us know.\n\n\nThanks and Regards,\nAdmin\nDeccan Sports Club");
 		emailSender.send(mesg);
 		user.setPassword(Base64.getEncoder().encodeToString(user.getPassword().getBytes()));
@@ -132,6 +139,15 @@ public class AdminController {
 	@PutMapping("/editManager")
 	public ResponseEntity<User> editManager(@Valid @RequestBody User user) {
 		user.setUserRole(UserRole.MANAGER);
+
+		if (user.getSportsName() != null || user.getSportsName().equals("")) {
+			Sports sports = sportsService.getSportsBySportsName(user.getSportsName());
+			if (sports != null) {
+				sports.setManagerId(user);
+				sportsService.addSport(sports);
+			}
+		}
+
 		System.out.println(user);
 		return new ResponseEntity<User>(adminService.editManager(user), HttpStatus.ACCEPTED);
 	}
@@ -174,6 +190,38 @@ public class AdminController {
 			return new ResponseEntity<String>("Account Locked", HttpStatus.OK);
 		}
 
+	}
+/**
+ * we need to make process fast or else remove this
+ * 
+ */
+	//work around condition to speed up the mail process
+	@GetMapping("/notifyMail/{userId}")
+	public  ResponseEntity<String> notification(@PathVariable int userId){
+		User user = userService.getUserById(userId);
+		SimpleMailMessage mesg = new SimpleMailMessage();
+		String msg = "";
+		int loginAttempt = user.getLoginAttempt();
+		if (loginAttempt > 3) {
+			msg = "Account Unlocked";
+			mesg.setFrom(host);
+			mesg.setTo(user.getEmail());
+			mesg.setSubject("Welcome to Deccan Sports Club");
+			mesg.setText("Hello " + user.getName()
+					+ ",\n\nYour account has been unlocked. Try to login into your account."
+					+ "\n\n\nThanks and Regards,\nAdmin,\nDeccan Sports Club");
+			emailSender.send(mesg);
+		} else {
+			msg = "Account Locked";
+			mesg.setFrom(host);
+			mesg.setTo(user.getEmail());
+			mesg.setSubject("Deccan Sports Club");
+			mesg.setText("Hello " + user.getName()
+					+ ",\n\nYour account has been locked due to activity associated with your account might have violated our terms.\nPlease contact our Sports Club to unlock your account. "
+					+ "\n\n\nThanks and Regards,\nAdmin,\nDeccan Sports Club");
+			emailSender.send(mesg);
+		}
+		return new ResponseEntity<String>(msg, HttpStatus.OK);
 	}
 
 //Uploading image on cloud with JGIT technology
@@ -312,20 +360,20 @@ public class AdminController {
 			return new ResponseEntity<User>(HttpStatus.NOT_FOUND);
 		}
 	}
-	
+
 	@GetMapping("/getAllFeedbacks")
-	public ResponseEntity<List<Object>> getFeedbacks(){
-		String uri = "http://localhost:7070/feedback/getAllFeedback";
+	public ResponseEntity<List<Object>> getFeedbacks() {
+		String uri = "http://" + feedbackUrl + ":7070/feedback/getAllFeedback";
 		RestTemplate restTemplate = new RestTemplate();
 		Object[] feedback = restTemplate.getForObject(uri, Object[].class);
 		List<Object> list = Arrays.asList(feedback);
-		return new ResponseEntity<>(list,HttpStatus.OK);
+		return new ResponseEntity<>(list, HttpStatus.OK);
 	}
 
 	// Uploading image on cloud with JGIT technology
 	@PostMapping("/uploadProfileImg/{userId}")
-	public ResponseEntity<String> uploadProfileImage(final @RequestParam("file") MultipartFile file, HttpServletRequest request,
-			@PathVariable int userId) {
+	public ResponseEntity<String> uploadProfileImage(final @RequestParam("file") MultipartFile file,
+			HttpServletRequest request, @PathVariable int userId) {
 		// STAGE:0 Initializing stage
 		String uploadDirectory = request.getServletContext().getRealPath(uploadFolder);
 		String message = "";
